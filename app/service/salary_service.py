@@ -18,7 +18,7 @@ def process_request(args):
             column_name, condition = parse_column_and_condition(param)
             if column_name is not None:
                 filter_operations.append(
-                    '`' + column_name + '`' + repo.obtain_condition(condition) + (
+                    '`' + column_name + '`' + obtain_condition(condition) + (
                         '"' + value + '"' if isinstance(value, str) else str(value))
                 )
 
@@ -75,3 +75,16 @@ def pretty_value(value):
     if value.isnumeric():
         return float(value)
     return value
+
+
+def obtain_condition(condition):
+    if condition == '[gte]':
+        return '>='
+    if condition == '[gt]':
+        return '>'
+    if condition == '[lte]':
+        return '<='
+    if condition == '[lt]':
+        return '<'
+
+    return '=='
