@@ -3,7 +3,9 @@ import re
 import app.repository.salary_repository as repo
 
 LEFT_BRACKET = '['
-ADDITIONAL_OPERATIONS = ['sort', 'fields']
+SORT_OPERATION = 'sort'
+FIELDS_OPERATION = 'fields'
+ADDITIONAL_OPERATIONS = set(SORT_OPERATION, FIELDS_OPERATION)
 
 
 def process_request(args):
@@ -23,9 +25,9 @@ def process_request(args):
             })
 
     for operation in additional_operations:
-        if operation['type'] == ADDITIONAL_OPERATIONS[0]:
+        if operation['type'] == SORT_OPERATION:
             dataset = repo.sort_dataset(dataset, operation['value'])
-        if operation['type'] == ADDITIONAL_OPERATIONS[1]:
+        if operation['type'] == FIELDS_OPERATION:
             dataset = repo.truncate_columns(dataset, operation['value'])
 
     return dataset.fillna('').to_dict(orient='records')
@@ -56,15 +58,11 @@ def parse_column_and_condition(column_name):
 
 def column_is_present(column_name):
     column_name = column_name.split(LEFT_BRACKET)[0].strip()
-    if column_name in repo.columns:
-        return True
-    return False
+    return column_name in repo.columns
 
 
 def operation_is_support(operation_name):
-    if operation_name in ADDITIONAL_OPERATIONS:
-        return True
-    return False
+    return operation_name in ADDITIONAL_OPERATIONS
 
 
 def pretty_value(value):
