@@ -17,9 +17,9 @@ def process_request(args):
         if column_is_present(param):
             column_name, condition = parse_column_and_condition(param)
             if column_name is not None:
+                str_value = '"' + value + '"' if isinstance(value, str) else str(value)
                 filter_operations.append(
-                    '`' + column_name + '`' + obtain_condition(condition) + (
-                        '"' + value + '"' if isinstance(value, str) else str(value))
+                    f'`{column_name}` {obtain_condition(condition)} {str_value}'
                 )
 
         elif operation_is_support(param) and check_fields_for_operation(value):
