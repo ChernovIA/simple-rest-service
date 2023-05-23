@@ -5,30 +5,34 @@ import app.repository.salary_repository as repo
 LEFT_BRACKET = '['
 SORT_OPERATION = 'sort'
 FIELDS_OPERATION = 'fields'
-ADDITIONAL_OPERATIONS = set(SORT_OPERATION, FIELDS_OPERATION)
+ADDITIONAL_OPERATIONS = {SORT_OPERATION, FIELDS_OPERATION}
 
 
 def process_request(args):
     dataset = repo.salary_dataset
-    additional_operations = []
+    filter_operations = []
+    additional_operations = dict()
     for param, value in args.items():
         value = pretty_value(value)
         if column_is_present(param):
             column_name, condition = parse_column_and_condition(param)
             if column_name is not None:
-                dataset = repo.filter_column_by_condition(dataset, column_name, condition, value)
+                filter_operations.append(
+                    '`' + column_name + '`' + repo.obtain_condition(condition) + (
+                        '"' + value + '"' if isinstance(value, str) else str(value))
+                )
 
         elif operation_is_support(param) and check_fields_for_operation(value):
-            additional_operations.append({
-                'type': param,
-                'value': value.split(',')
-            })
+            additional_operations[param] = value.split(',')
 
-    for operation in additional_operations:
-        if operation['type'] == SORT_OPERATION:
-            dataset = repo.sort_dataset(dataset, operation['value'])
-        if operation['type'] == FIELDS_OPERATION:
-            dataset = repo.truncate_columns(dataset, operation['value'])
+    if len(filter_operations) > 0:
+        dataset = repo.filter_dataset(filter_operations)
+
+    if additional_operations.get(SORT_OPERATION) is not None:
+        dataset = repo.sort_dataset(dataset, additional_operations[SORT_OPERATION])
+
+    if additional_operations.get(FIELDS_OPERATION) is not None:
+        dataset = repo.truncate_columns(dataset, additional_operations[FIELDS_OPERATION])
 
     return dataset.fillna('').to_dict(orient='records')
 
