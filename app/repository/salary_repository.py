@@ -5,19 +5,6 @@ salary_dataset = pd.read_csv('app/db/salary_survey.csv')
 columns = set(salary_dataset.columns)
 
 
-def obtain_condition(condition):
-    if condition == '[gte]':
-        return '>='
-    if condition == '[gt]':
-        return '>'
-    if condition == '[lte]':
-        return '<='
-    if condition == '[lt]':
-        return '<'
-
-    return '=='
-
-
 def filter_dataset(conditions):
     return salary_dataset.query(' & '.join(conditions))
 
