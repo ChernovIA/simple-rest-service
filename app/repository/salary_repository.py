@@ -1,6 +1,9 @@
 import pandas as pd
 
-salary_dataset = pd.read_csv('app/db/salary_survey.csv')
+try:
+    salary_dataset = pd.read_csv('app/db/salary_survey.csv')
+except Exception as exception:
+    salary_dataset = pd.read_csv('../db/salary_survey.csv')
 
 columns = set(salary_dataset.columns)
 
